@@ -4,6 +4,55 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// Product Image Component with error handling
+function ProductImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true);
+      setIsLoading(false);
+      console.log('Image failed to load:', src);
+    }
+  };
+
+  const handleLoad = () => {
+    setIsLoading(false);
+  };
+
+  // If no src provided or has error, show placeholder
+  if (!src || hasError) {
+    return (
+      <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
+        <div className="text-center text-gray-500">
+          <div className="text-4xl mb-2">📦</div>
+          <div className="text-xs">{alt.split(' ')[0]}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full">
+      {isLoading && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+          <div className="text-gray-400 text-4xl">📦</div>
+        </div>
+      )}
+      <img
+        src={imgSrc}
+        alt={alt}
+        className={className}
+        onLoad={handleLoad}
+        onError={handleError}
+        style={{ display: hasError ? 'none' : 'block' }}
+      />
+    </div>
+  );
+}
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://smrtmart-go-backend-1753976056-b4c4ef7e5ab7.herokuapp.com/api/v1';
 
 interface Product {
@@ -109,11 +158,9 @@ export default function HomePage() {
               className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
               <div className="relative w-full pt-[75%]">
-                <Image
-                  src={product.images[0] || '/placeholder-product.jpg'}
+                <ProductImage
+                  src={product.images[0] || ''}
                   alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity duration-300"
                 />
                 {product.featured && (
@@ -167,11 +214,9 @@ export default function HomePage() {
               className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
               <div className="relative w-full pt-[75%]">
-                <Image
-                  src={product.images[0] || '/placeholder-product.jpg'}
+                <ProductImage
+                  src={product.images[0] || ''}
                   alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="absolute inset-0 w-full h-full object-cover group-hover:opacity-75 transition-opacity duration-300"
                 />
               </div>
