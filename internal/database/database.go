@@ -3,8 +3,9 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
-	"smrtmart-backend/internal/config"
+	"smrtmart-go-postgresql/internal/config"
 
 	_ "github.com/lib/pq"
 	"github.com/golang-migrate/migrate/v4"
@@ -13,8 +14,15 @@ import (
 )
 
 func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
+	var dsn string
+	
+	// Check if DATABASE_URL is available (Heroku)
+	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
+		dsn = databaseURL
+	} else {
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -33,8 +41,15 @@ func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
 }
 
 func RunMigrations(cfg config.DatabaseConfig) error {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
+	var dsn string
+	
+	// Check if DATABASE_URL is available (Heroku)
+	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
+		dsn = databaseURL
+	} else {
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

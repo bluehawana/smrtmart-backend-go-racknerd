@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"smrtmart-backend/internal/models"
-	"smrtmart-backend/internal/service"
+	"smrtmart-go-postgresql/internal/models"
+	"smrtmart-go-postgresql/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

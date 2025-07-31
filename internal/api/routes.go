@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	"smrtmart-backend/internal/config"
-	"smrtmart-backend/internal/middleware"
-	"smrtmart-backend/internal/service"
+	"smrtmart-go-postgresql/internal/config"
+	"smrtmart-go-postgresql/internal/middleware"
+	"smrtmart-go-postgresql/internal/service"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

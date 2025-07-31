@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"smrtmart-backend/internal/config"
+	"smrtmart-go-postgresql/internal/config"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"smrtmart-backend/internal/config"
+	"smrtmart-go-postgresql/internal/config"
 
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"

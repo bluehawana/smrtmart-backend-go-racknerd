@@ -1,4 +1,4 @@
-module smrtmart-backend
+module smrtmart-go-postgresql
 
 go 1.23.0
 

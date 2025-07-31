@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 
-	"smrtmart-backend/internal/models"
-	"smrtmart-backend/internal/repository"
+	"smrtmart-go-postgresql/internal/models"
+	"smrtmart-go-postgresql/internal/repository"
 
 	"github.com/google/uuid"
 )

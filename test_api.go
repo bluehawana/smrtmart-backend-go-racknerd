@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"smrtmart-backend/internal/api"
-	"smrtmart-backend/internal/config"
-	"smrtmart-backend/internal/database"
-	"smrtmart-backend/internal/repository"
-	"smrtmart-backend/internal/service"
+	"smrtmart-go-postgresql/internal/api"
+	"smrtmart-go-postgresql/internal/config"
+	"smrtmart-go-postgresql/internal/database"
+	"smrtmart-go-postgresql/internal/repository"
+	"smrtmart-go-postgresql/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

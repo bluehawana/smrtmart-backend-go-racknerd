@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"smrtmart-backend/internal/models"
+	"smrtmart-go-postgresql/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"

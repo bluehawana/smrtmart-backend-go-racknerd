@@ -1,0 +1,32 @@
+{
+  "name": "SmartMart Go Backend",
+  "description": "SmartMart e-commerce backend built with Go and PostgreSQL",
+  "repository": "https://github.com/bluehawana/smrtmart-go-postgresql",
+  "keywords": ["go", "gin", "postgresql", "ecommerce", "api"],
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ],
+  "env": {
+    "GIN_MODE": {
+      "description": "Gin framework mode",
+      "value": "release"
+    },
+    "DB_SSLMODE": {
+      "description": "PostgreSQL SSL mode",
+      "value": "require"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/go"
+    }
+  ]
+}

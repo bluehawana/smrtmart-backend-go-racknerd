@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"smrtmart-backend/internal/models"
+	"smrtmart-go-postgresql/internal/models"
 
 	"github.com/lib/pq"
 )

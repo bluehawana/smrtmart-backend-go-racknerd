@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"smrtmart-backend/internal/service"
+	"smrtmart-go-postgresql/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

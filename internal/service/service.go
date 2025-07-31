@@ -1,8 +1,8 @@
 package service
 
 import (
-	"smrtmart-backend/internal/config"
-	"smrtmart-backend/internal/repository"
+	"smrtmart-go-postgresql/internal/config"
+	"smrtmart-go-postgresql/internal/repository"
 )
 
 type Services struct {

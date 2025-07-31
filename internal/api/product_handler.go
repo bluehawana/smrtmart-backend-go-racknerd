@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"smrtmart-backend/internal/models"
-	"smrtmart-backend/internal/repository"
-	"smrtmart-backend/internal/service"
+	"smrtmart-go-postgresql/internal/models"
+	"smrtmart-go-postgresql/internal/repository"
+	"smrtmart-go-postgresql/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
