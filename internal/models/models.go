@@ -1,6 +1,9 @@
 package models
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -247,4 +250,64 @@ type Pagination struct {
 type PaginatedResponse struct {
 	Data       interface{} `json:"data"`
 	Pagination Pagination  `json:"pagination"`
+}
+
+// Database scanning methods for JSONB fields
+
+// Scan implements sql.Scanner for Dimensions
+func (d *Dimensions) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("cannot scan %T into Dimensions", value)
+	}
+
+	return json.Unmarshal(bytes, d)
+}
+
+// Value implements driver.Valuer for Dimensions
+func (d Dimensions) Value() (driver.Value, error) {
+	return json.Marshal(d)
+}
+
+// Scan implements sql.Scanner for SEOData
+func (s *SEOData) Scan(value interface{}) error {
+	if value == nil {
+		*s = SEOData{}
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("cannot scan %T into SEOData", value)
+	}
+
+	return json.Unmarshal(bytes, s)
+}
+
+// Value implements driver.Valuer for SEOData
+func (s SEOData) Value() (driver.Value, error) {
+	return json.Marshal(s)
+}
+
+// Scan implements sql.Scanner for Address
+func (a *Address) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("cannot scan %T into Address", value)
+	}
+
+	return json.Unmarshal(bytes, a)
+}
+
+// Value implements driver.Valuer for Address
+func (a Address) Value() (driver.Value, error) {
+	return json.Marshal(a)
 }
