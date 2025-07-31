@@ -14,33 +14,16 @@ func CORS(allowedOrigins []string) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		
-		// Debug logging
-		if origin != "" {
-			// Log the origin and allowed origins for debugging
-			c.Header("X-Debug-Origin", origin)
-			c.Header("X-Debug-Allowed", strings.Join(allowedOrigins, "|"))
-		}
-		
-		// Check if origin is allowed
-		isAllowed := false
-		for _, allowedOrigin := range allowedOrigins {
-			if strings.TrimSpace(allowedOrigin) == origin {
-				isAllowed = true
-				break
-			}
-		}
-		
-		// Always set CORS headers for debugging
+		// Temporarily allow all origins for debugging
+		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
-		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Max-Age", "43200") // 12 hours
 		
-		// If origin is allowed, set CORS headers
-		if isAllowed {
-			c.Header("Access-Control-Allow-Origin", origin)
-		}
+		// Debug info
+		c.Header("X-Debug-Origin", origin)
+		c.Header("X-Debug-Allowed", strings.Join(allowedOrigins, "|"))
 		
 		// Handle preflight OPTIONS request
 		if c.Request.Method == "OPTIONS" {
