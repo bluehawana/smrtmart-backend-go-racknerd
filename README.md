@@ -1,6 +1,6 @@
-# SmartMart Backend API
+# 🚀 SmartMart Go Backend API
 
-A professional ecommerce platform API built with Go, designed to help SMEs achieve digitalization through online selling, business management, and advertising solutions.
+A professional ecommerce platform API built with **Go**, designed to help SMEs achieve digitalization through online selling, business management, and advertising solutions.
 
 ## 🚀 Features
 
@@ -28,15 +28,15 @@ A professional ecommerce platform API built with Go, designed to help SMEs achie
 
 ## 🛠 Tech Stack
 
-- **Language**: Go 1.21
-- **Framework**: Gin (HTTP router)
-- **Database**: PostgreSQL 15
-- **Cache**: Redis 7
-- **Payment**: Stripe API
-- **Authentication**: JWT tokens
-- **Documentation**: Swagger/OpenAPI
-- **Deployment**: Docker & Docker Compose
-- **Migration**: golang-migrate
+- **Language**: Go 1.21+
+- **Framework**: Gin (High-performance HTTP router)
+- **Database**: PostgreSQL 15 with optimized queries
+- **Cache**: Redis 7 (ready for scaling)
+- **Payment**: Stripe API with webhook support
+- **Authentication**: JWT tokens with role-based access
+- **Documentation**: Swagger/OpenAPI 3.0
+- **Deployment**: Docker, Railway, Vercel
+- **Migration**: golang-migrate with version control
 
 ## 📋 Prerequisites
 
@@ -48,11 +48,11 @@ A professional ecommerce platform API built with Go, designed to help SMEs achie
 
 ## 🚀 Quick Start
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Quick Start with Go (Recommended)
 
 1. **Clone and setup**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/bluehawana/smrtmart-go-backend.git
    cd smrtmart-go-backend
    cp .env.example .env
    ```
@@ -60,11 +60,11 @@ A professional ecommerce platform API built with Go, designed to help SMEs achie
 2. **Configure environment**:
    Edit `.env` file with your settings (database, Stripe keys, etc.)
 
-3. **Start all services**:
+3. **Start the Go server**:
    ```bash
-   make docker-run
-   # or
-   docker-compose up -d
+   go run test_api.go
+   # or use the deployment script
+   ./deploy.sh
    ```
 
 4. **Verify deployment**:
