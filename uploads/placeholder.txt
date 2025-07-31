@@ -1,8 +1,0 @@
-This directory contains product images.
-For demo purposes, you can add actual product images here:
-- macbook-pro-16.jpg
-- airpods-pro-2.jpg
-- sony-wh1000xm5.jpg
-- dell-xps-13.jpg
-- dell-alienware-34.jpg
-- apple-watch-ultra.jpg
