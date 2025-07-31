@@ -6,24 +6,42 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/cors"
 	"golang.org/x/time/rate"
 )
 
 // CORS middleware
 func CORS(allowedOrigins []string) gin.HandlerFunc {
-	c := cors.New(cors.Options{
-		AllowedOrigins:   allowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"*"},
-		AllowCredentials: true,
-		MaxAge:           int((12 * time.Hour).Seconds()),
+	return gin.HandlerFunc(func(c *gin.Context) {
+		origin := c.Request.Header.Get("Origin")
+		
+		// Check if origin is allowed
+		isAllowed := false
+		for _, allowedOrigin := range allowedOrigins {
+			if strings.TrimSpace(allowedOrigin) == origin {
+				isAllowed = true
+				break
+			}
+		}
+		
+		// If origin is allowed, set CORS headers
+		if isAllowed {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
+		
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Max-Age", "43200") // 12 hours
+		
+		// Handle preflight OPTIONS request
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		
+		c.Next()
 	})
-
-	return gin.WrapH(c.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// This is a placeholder handler, the actual handling is done by Gin
-	})))
 }
 
 // Security headers middleware
