@@ -74,7 +74,25 @@ ARRAY['apple', 'watch', 'ultra', 'fitness', 'rugged'],
 ARRAY['apple-watch-ultra.jpg'], 
 30, 'active', true, 0.061,
 '{"length": 4.9, "width": 4.4, "height": 1.45}',
-'{"title": "Apple Watch Ultra - Rugged Smartwatch", "description": "Most advanced Apple Watch for extreme sports and adventures", "keywords": ["apple", "watch", "ultra", "fitness", "rugged", "smartwatch"]}');
+'{"title": "Apple Watch Ultra - Rugged Smartwatch", "description": "Most advanced Apple Watch for extreme sports and adventures", "keywords": ["apple", "watch", "ultra", "fitness", "rugged", "smartwatch"]}'),
+
+(uuid_generate_v4(), '550e8400-e29b-41d4-a716-446655440002', 'AI Translate Earphones Pro', 
+'Revolutionary intelligent translate earphones with real-time translation in 40+ languages. Perfect for travelers, business professionals, and language learners. Features noise cancellation, 8-hour battery life, and instant voice translation.', 
+199.00, 249.00, 'AI-TRANSLATE-PRO', 'audio', 
+ARRAY['translate', 'earphones', 'ai', 'language', 'travel', 'wireless'], 
+ARRAY['ai-translate-earphones.jpg'], 
+25, 'active', true, 0.08,
+'{"length": 6.5, "width": 4.2, "height": 2.8}',
+'{"title": "AI Translate Earphones Pro - Real-time Translation", "description": "Smart earphones with instant translation in 40+ languages", "keywords": ["translate", "earphones", "ai", "language", "travel", "wireless"]}'),
+
+(uuid_generate_v4(), '550e8400-e29b-41d4-a716-446655440002', 'Smart Language Translator Buds', 
+'Next-generation wireless earbuds with built-in AI translator. Supports conversation mode, offline translation for 12 languages, and crystal-clear audio quality. Ideal for international business and travel.', 
+149.00, 179.00, 'SMART-LANG-BUDS', 'audio', 
+ARRAY['translator', 'earbuds', 'smart', 'wireless', 'business', 'travel'], 
+ARRAY['smart-translator-buds.jpg'], 
+40, 'active', true, 0.06,
+'{"length": 5.8, "width": 3.9, "height": 2.4}',
+'{"title": "Smart Language Translator Buds - Wireless Translation", "description": "Advanced wireless earbuds with AI-powered real-time translation", "keywords": ["translator", "earbuds", "smart", "wireless", "business", "travel"]}');
 
 -- Insert sample customer user
 INSERT INTO users (id, email, password_hash, first_name, last_name, role, status) VALUES
