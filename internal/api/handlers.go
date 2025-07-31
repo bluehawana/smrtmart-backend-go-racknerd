@@ -140,7 +140,15 @@ func NewCartHandler(service service.CartService) *CartHandler {
 }
 
 func (h *CartHandler) GetCart(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Get cart endpoint - TODO"})
+	// Return empty cart structure for now (client-side cart)
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"items": []interface{}{},
+			"total": 0,
+			"count": 0,
+		},
+	})
 }
 
 func (h *CartHandler) AddItem(c *gin.Context) {
