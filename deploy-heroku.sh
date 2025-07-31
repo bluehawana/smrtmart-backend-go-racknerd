@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🚀 SmartMart Go Backend - Heroku Deployment Script"
-echo "=================================================="
+echo "🚀 SmartMart Go Backend - Heroku Deployment with PostgreSQL"
+echo "=========================================================="
 
 # Check if logged into Heroku
 if ! heroku auth:whoami > /dev/null 2>&1; then
@@ -18,7 +18,7 @@ heroku create $APP_NAME
 
 # Add PostgreSQL addon
 echo "🐘 Adding PostgreSQL addon..."
-heroku addons:create heroku-postgresql:mini --app $APP_NAME
+heroku addons:create heroku-postgresql:essential-0 --app $APP_NAME
 
 # Set environment variables
 echo "⚙️  Setting environment variables..."
@@ -33,7 +33,7 @@ fi
 # Deploy
 echo "🚀 Deploying to Heroku..."
 git add .
-git commit -m "Deploy to Heroku" || echo "No changes to commit"
+git commit -m "Deploy to Heroku with PostgreSQL" || echo "No changes to commit"
 git push heroku master
 
 # Get app URL
@@ -44,8 +44,10 @@ echo "🎉 Deployment complete!"
 echo "🌐 Your API is available at: ${APP_URL}api/v1"
 echo "📚 API Documentation: ${APP_URL}swagger/index.html"
 echo "🔧 App name: $APP_NAME"
+echo "🐘 Database: Heroku PostgreSQL"
 echo ""
 echo "Next steps:"
 echo "1. Update your frontend environment variables with: ${APP_URL}api/v1"
 echo "2. Test your API endpoints"
 echo "3. Set up custom domain if needed"
+echo "4. Check database logs: heroku logs --tail --app $APP_NAME"

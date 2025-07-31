@@ -5,7 +5,7 @@
   "keywords": ["go", "gin", "postgresql", "ecommerce", "api"],
   "addons": [
     {
-      "plan": "heroku-postgresql:mini"
+      "plan": "heroku-postgresql:essential-0"
     }
   ],
   "env": {

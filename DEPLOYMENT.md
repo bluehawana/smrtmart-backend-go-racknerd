@@ -1,44 +1,59 @@
 # 🚀 SmartMart Cloud Deployment Guide
 
-## Backend Deployment (Railway)
+## Backend Deployment (Heroku + PostgreSQL)
 
-### Step 1: Create Railway Account
-1. Go to [railway.app](https://railway.app)
-2. Sign up with GitHub
-3. Connect your GitHub account
-
-### Step 2: Deploy Backend
-1. Click "New Project" → "Deploy from GitHub repo"
-2. Select `smrtmart-backend` repository
-3. Choose `dev` branch for testing
-4. Railway will auto-detect Go and deploy
-
-### Step 3: Add Database
-1. In Railway dashboard, click "New" → "Database" → "PostgreSQL"
-2. Copy the connection details
-3. Add environment variables in Railway:
+### Step 1: Deploy Backend to Heroku
+1. Clone the repository and navigate to the backend folder
+2. Make sure you have the Heroku CLI installed
+3. Run the deployment script:
+   ```bash
+   chmod +x deploy-heroku.sh
+   ./deploy-heroku.sh
    ```
-   DB_HOST=your-railway-postgres-host
-   DB_PORT=5432
-   DB_USER=postgres
-   DB_PASSWORD=your-railway-db-password
-   DB_NAME=railway
-   DB_SSLMODE=require
-   GIN_MODE=release
-   PORT=8080
-   CORS_ORIGINS=https://smrtmart.com,https://www.smrtmart.com
-   JWT_SECRET=your-secure-jwt-secret
-   STRIPE_SECRET_KEY=sk_test_your_stripe_key
-   ```
+4. The script will automatically create a PostgreSQL database
 
-### Step 4: Run Migrations
-1. In Railway, go to your service
-2. Open "Deploy Logs"
-3. Migrations will run automatically on startup
+### Step 2: Manual Heroku Setup (Alternative)
+If you prefer manual setup:
+```bash
+# Login to Heroku
+heroku login
 
-### Step 5: Get Your API URL
-- Railway will provide a URL like: `https://your-app-name.railway.app`
-- Your API will be available at: `https://your-app-name.railway.app/api/v1`
+# Create app
+heroku create your-app-name
+
+# Add PostgreSQL addon
+heroku addons:create heroku-postgresql:essential-0 --app your-app-name
+
+# Set environment variables
+heroku config:set GIN_MODE=release --app your-app-name
+heroku config:set DB_SSLMODE=require --app your-app-name
+
+# Deploy
+git push heroku main
+```
+
+### Step 3: Run Database Migrations
+The migrations will run automatically when the app starts. You can also run them manually:
+```bash
+heroku run ./main migrate --app your-app-name
+```
+
+### Step 4: Get Your API URL
+- Heroku will provide a URL like: `https://your-app-name.herokuapp.com`
+- Your API will be available at: `https://your-app-name.herokuapp.com/api/v1`
+
+### Step 5: Database Management
+You can manage your database using:
+```bash
+# Connect to database
+heroku pg:psql --app your-app-name
+
+# View database info
+heroku pg:info --app your-app-name
+
+# View database logs
+heroku logs --tail --app your-app-name
+```
 
 ## Frontend Deployment (Vercel)
 
@@ -56,8 +71,8 @@
 ### Step 3: Add Environment Variables
 In Vercel dashboard, add:
 ```
-NEXT_PUBLIC_API_URL=https://your-railway-app.railway.app/api/v1
-NEXT_PUBLIC_IMAGE_BASE_URL=https://your-railway-app.railway.app/uploads
+NEXT_PUBLIC_API_URL=https://your-heroku-app.herokuapp.com/api/v1
+NEXT_PUBLIC_IMAGE_BASE_URL=https://your-heroku-app.herokuapp.com/uploads
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
 ```
 
