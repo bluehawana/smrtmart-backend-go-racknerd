@@ -132,16 +132,27 @@ func (r *productRepository) GetAll(filters ProductFilters) ([]*models.Product, i
 	var products []*models.Product
 	for rows.Next() {
 		product := &models.Product{}
+		var dimensionsJSON, seoJSON []byte
+		
 		err := rows.Scan(
 			&product.ID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
-			&product.Status, &product.Featured, &product.Weight, &product.Dimensions,
-			&product.SEO, &product.CreatedAt, &product.UpdatedAt,
+			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
+			&seoJSON, &product.CreatedAt, &product.UpdatedAt,
 		)
 		if err != nil {
 			return nil, 0, err
 		}
+
+		// Parse JSON fields
+		if dimensionsJSON != nil {
+			json.Unmarshal(dimensionsJSON, &product.Dimensions)
+		}
+		if seoJSON != nil {
+			json.Unmarshal(seoJSON, &product.SEO)
+		}
+
 		products = append(products, product)
 	}
 
@@ -227,16 +238,27 @@ func (r *productRepository) GetByVendor(vendorID uuid.UUID, filters ProductFilte
 	var products []*models.Product
 	for rows.Next() {
 		product := &models.Product{}
+		var dimensionsJSON, seoJSON []byte
+		
 		err := rows.Scan(
 			&product.ID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
-			&product.Status, &product.Featured, &product.Weight, &product.Dimensions,
-			&product.SEO, &product.CreatedAt, &product.UpdatedAt,
+			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
+			&seoJSON, &product.CreatedAt, &product.UpdatedAt,
 		)
 		if err != nil {
 			return nil, 0, err
 		}
+
+		// Parse JSON fields
+		if dimensionsJSON != nil {
+			json.Unmarshal(dimensionsJSON, &product.Dimensions)
+		}
+		if seoJSON != nil {
+			json.Unmarshal(seoJSON, &product.SEO)
+		}
+
 		products = append(products, product)
 	}
 
@@ -298,16 +320,27 @@ func (r *productRepository) Search(query string, filters ProductFilters) ([]*mod
 	var products []*models.Product
 	for rows.Next() {
 		product := &models.Product{}
+		var dimensionsJSON, seoJSON []byte
+		
 		err := rows.Scan(
 			&product.ID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
-			&product.Status, &product.Featured, &product.Weight, &product.Dimensions,
-			&product.SEO, &product.CreatedAt, &product.UpdatedAt,
+			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
+			&seoJSON, &product.CreatedAt, &product.UpdatedAt,
 		)
 		if err != nil {
 			return nil, 0, err
 		}
+
+		// Parse JSON fields
+		if dimensionsJSON != nil {
+			json.Unmarshal(dimensionsJSON, &product.Dimensions)
+		}
+		if seoJSON != nil {
+			json.Unmarshal(seoJSON, &product.SEO)
+		}
+
 		products = append(products, product)
 	}
 
@@ -333,16 +366,27 @@ func (r *productRepository) GetFeatured(limit int) ([]*models.Product, error) {
 	var products []*models.Product
 	for rows.Next() {
 		product := &models.Product{}
+		var dimensionsJSON, seoJSON []byte
+		
 		err := rows.Scan(
 			&product.ID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
-			&product.Status, &product.Featured, &product.Weight, &product.Dimensions,
-			&product.SEO, &product.CreatedAt, &product.UpdatedAt,
+			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
+			&seoJSON, &product.CreatedAt, &product.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		// Parse JSON fields
+		if dimensionsJSON != nil {
+			json.Unmarshal(dimensionsJSON, &product.Dimensions)
+		}
+		if seoJSON != nil {
+			json.Unmarshal(seoJSON, &product.SEO)
+		}
+
 		products = append(products, product)
 	}
 
