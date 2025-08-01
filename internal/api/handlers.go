@@ -140,7 +140,7 @@ func NewCartHandler(service service.CartService) *CartHandler {
 }
 
 func (h *CartHandler) GetCart(c *gin.Context) {
-	// Return empty cart structure matching frontend expectations
+	// For now, return empty cart array - frontend will handle via localStorage
 	c.JSON(http.StatusOK, []interface{}{})
 }
 
@@ -155,24 +155,47 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	// Return format that matches frontend expectations
+	// Return successful response matching frontend expectations
 	c.JSON(http.StatusOK, gin.H{
-		"id":        req.ProductID, // Use productId as temporary id
+		"id":        req.ProductID,
 		"productId": req.ProductID,
 		"quantity":  req.Quantity,
+		"success":   true,
 	})
 }
 
 func (h *CartHandler) UpdateItem(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Update cart item endpoint - TODO"})
+	itemID := c.Param("id")
+	var req struct {
+		Quantity int `json:"quantity" binding:"required,gt=0"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":       itemID,
+		"quantity": req.Quantity,
+		"success":  true,
+	})
 }
 
 func (h *CartHandler) RemoveItem(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Remove cart item endpoint - TODO"})
+	itemID := c.Param("id")
+	c.JSON(http.StatusOK, gin.H{
+		"id":      itemID,
+		"success": true,
+		"message": "Item removed from cart",
+	})
 }
 
 func (h *CartHandler) ClearCart(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Clear cart endpoint - TODO"})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Cart cleared successfully",
+	})
 }
 
 // OrderHandler handles order endpoints

@@ -70,6 +70,7 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 				cart.PUT("/items/:id", cartHandler.UpdateItem)
 				cart.DELETE("/items/:id", cartHandler.RemoveItem)
 				cart.DELETE("", cartHandler.ClearCart)
+				cart.POST("/clear", cartHandler.ClearCart)  // Additional endpoint for frontend compatibility
 			}
 
 			// Orders (checkout)
