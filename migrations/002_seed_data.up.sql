@@ -4,7 +4,9 @@ INSERT INTO categories (id, name, slug, description, is_active, sort_order) VALU
 (uuid_generate_v4(), 'Computers', 'computers', 'Laptops, desktops, and computer accessories', true, 2),
 (uuid_generate_v4(), 'Audio', 'audio', 'Headphones, speakers, and audio equipment', true, 3),
 (uuid_generate_v4(), 'Wearables', 'wearables', 'Smart watches and wearable technology', true, 4),
-(uuid_generate_v4(), 'Monitors', 'monitors', 'Computer monitors and displays', true, 5);
+(uuid_generate_v4(), 'Monitors', 'monitors', 'Computer monitors and displays', true, 5),
+(uuid_generate_v4(), 'Networking', 'networking', 'Routers, switches, and networking equipment', true, 6),
+(uuid_generate_v4(), 'Smartphones', 'smartphones', 'Mobile phones and accessories', true, 7);
 
 -- Insert sample admin user
 INSERT INTO users (id, email, password_hash, first_name, last_name, role, status) VALUES
@@ -92,7 +94,25 @@ ARRAY['translator', 'earbuds', 'smart', 'wireless', 'business', 'travel'],
 ARRAY['smart-translator-buds.jpg'], 
 40, 'active', true, 0.06,
 '{"length": 5.8, "width": 3.9, "height": 2.4}',
-'{"title": "Smart Language Translator Buds - Wireless Translation", "description": "Advanced wireless earbuds with AI-powered real-time translation", "keywords": ["translator", "earbuds", "smart", "wireless", "business", "travel"]}');
+'{"title": "Smart Language Translator Buds - Wireless Translation", "description": "Advanced wireless earbuds with AI-powered real-time translation", "keywords": ["translator", "earbuds", "smart", "wireless", "business", "travel"]}'),
+
+(uuid_generate_v4(), '550e8400-e29b-41d4-a716-446655440002', 'ASUS ROG Rapture GT-BE98 Gaming Router', 
+'Quad-band Gaming Router with WiFi 7, advanced QoS, and ultra-low latency for competitive gaming. Features 10Gb ports, RGB lighting, and advanced gaming acceleration.', 
+899.99, 999.99, 'ASUS-ROG-GT-BE98', 'networking', 
+ARRAY['asus', 'router', 'gaming', 'wifi7', 'networking'], 
+ARRAY['asus.jpg'], 
+8, 'active', false, 1.2,
+'{"length": 26.0, "width": 26.0, "height": 16.8}',
+'{"title": "ASUS ROG Gaming Router - WiFi 7", "description": "Professional gaming router with ultra-low latency", "keywords": ["asus", "router", "gaming", "wifi7", "networking"]}'),
+
+(uuid_generate_v4(), '550e8400-e29b-41d4-a716-446655440002', 'iPhone 15 Pro Max', 
+'The ultimate iPhone with titanium design, A17 Pro chip, and professional camera system. Features 6.7-inch Super Retina XDR display and advanced photography capabilities.', 
+1199.99, 1299.99, 'IPHONE-15-PRO-MAX', 'smartphones', 
+ARRAY['apple', 'iphone', 'smartphone', 'titanium', 'pro'], 
+ARRAY['iphone.jpg'], 
+18, 'active', true, 0.221,
+'{"length": 15.99, "width": 7.69, "height": 0.83}',
+'{"title": "iPhone 15 Pro Max - Premium Smartphone", "description": "Most advanced iPhone with titanium design and A17 Pro chip", "keywords": ["apple", "iphone", "smartphone", "titanium", "pro", "a17"]}');
 
 -- Insert sample customer user
 INSERT INTO users (id, email, password_hash, first_name, last_name, role, status) VALUES
