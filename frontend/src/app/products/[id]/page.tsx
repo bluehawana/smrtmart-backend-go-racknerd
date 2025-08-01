@@ -139,13 +139,15 @@ export default function ProductDetailPage() {
         {/* Product Images */}
         <div>
           <div className="aspect-square mb-6 bg-gray-100 rounded-lg overflow-hidden">
-            <Image
+            <img
               src={product.images[selectedImage] || '/placeholder-product.jpg'}
               alt={product.name}
-              width={600}
-              height={600}
               className="w-full h-full object-cover"
-              priority
+              style={{ objectFit: 'cover' }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5OmPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBmb250LXNpemU9IjE2IiBmaWxsPSIjOWNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+              }}
             />
           </div>
           
@@ -159,12 +161,15 @@ export default function ProductDetailPage() {
                     selectedImage === index ? 'border-blue-500' : 'border-gray-200'
                   }`}
                 >
-                  <Image
+                  <img
                     src={image}
                     alt={`${product.name} view ${index + 1}`}
-                    width={150}
-                    height={150}
                     className="w-full h-full object-cover"
+                    style={{ objectFit: 'cover' }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj7wn5OmPC90ZXh0Pjwvc3ZnPg==';
+                    }}
                   />
                 </button>
               ))}

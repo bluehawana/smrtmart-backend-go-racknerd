@@ -4,26 +4,9 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Product Image Component with error handling
+// Product Image Component with error handling - Simple version for production
 function ProductImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  const [imgSrc, setImgSrc] = useState(src);
-  const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const handleError = () => {
-    if (!hasError) {
-      setHasError(true);
-      setIsLoading(false);
-      console.log('Image failed to load:', src);
-    }
-  };
-
-  const handleLoad = () => {
-    setIsLoading(false);
-  };
-
-  // If no src provided or has error, show placeholder
-  if (!src || hasError) {
+  if (!src) {
     return (
       <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
         <div className="text-center text-gray-500">
@@ -35,21 +18,24 @@ function ProductImage({ src, alt, className }: { src: string; alt: string; class
   }
 
   return (
-    <div className="relative w-full h-full">
-      {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          <div className="text-gray-400 text-4xl">📦</div>
-        </div>
-      )}
-      <img
-        src={imgSrc}
-        alt={alt}
-        className={className}
-        onLoad={handleLoad}
-        onError={handleError}
-        style={{ display: hasError ? 'none' : 'block' }}
-      />
-    </div>
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={{ objectFit: 'cover' }}
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        target.parentElement!.innerHTML = `
+          <div class="bg-gray-200 flex items-center justify-center w-full h-full">
+            <div class="text-center text-gray-500">
+              <div class="text-4xl mb-2">📦</div>
+              <div class="text-xs">${alt.split(' ')[0]}</div>
+            </div>
+          </div>
+        `;
+      }}
+    />
   );
 }
 
