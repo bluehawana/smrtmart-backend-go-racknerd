@@ -140,19 +140,27 @@ func NewCartHandler(service service.CartService) *CartHandler {
 }
 
 func (h *CartHandler) GetCart(c *gin.Context) {
-	// Return empty cart structure for now (client-side cart)
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"data": gin.H{
-			"items": []interface{}{},
-			"total": 0,
-			"count": 0,
-		},
-	})
+	// Return empty cart structure matching frontend expectations
+	c.JSON(http.StatusOK, []interface{}{})
 }
 
 func (h *CartHandler) AddItem(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Add cart item endpoint - TODO"})
+	var req struct {
+		ProductID int `json:"productId" binding:"required"`
+		Quantity  int `json:"quantity" binding:"required,gt=0"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return format that matches frontend expectations
+	c.JSON(http.StatusOK, gin.H{
+		"id":        req.ProductID, // Use productId as temporary id
+		"productId": req.ProductID,
+		"quantity":  req.Quantity,
+	})
 }
 
 func (h *CartHandler) UpdateItem(c *gin.Context) {
