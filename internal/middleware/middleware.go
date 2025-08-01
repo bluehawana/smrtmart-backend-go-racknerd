@@ -14,16 +14,45 @@ func CORS(allowedOrigins []string) gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		
-		// Temporarily allow all origins for debugging
-		c.Header("Access-Control-Allow-Origin", "*")
+		// Check if origin is allowed
+		allowedOrigin := ""
+		for _, allowed := range allowedOrigins {
+			if origin == allowed {
+				allowedOrigin = origin
+				break
+			}
+		}
+		
+		// If no specific origins provided, allow common production domains
+		if len(allowedOrigins) == 0 {
+			commonOrigins := []string{
+				"https://www.smrtmart.com",
+				"https://smrtmart.com", 
+				"http://localhost:3000",
+				"http://localhost:3001",
+			}
+			for _, allowed := range commonOrigins {
+				if origin == allowed {
+					allowedOrigin = origin
+					break
+				}
+			}
+		}
+		
+		// Set CORS headers
+		if allowedOrigin != "" {
+			c.Header("Access-Control-Allow-Origin", allowedOrigin)
+			c.Header("Access-Control-Allow-Credentials", "true")
+		}
+		
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
-		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
+		c.Header("Access-Control-Expose-Headers", "Content-Length")
 		c.Header("Access-Control-Max-Age", "43200") // 12 hours
 		
 		// Debug info
 		c.Header("X-Debug-Origin", origin)
-		c.Header("X-Debug-Allowed", strings.Join(allowedOrigins, "|"))
+		c.Header("X-Debug-Allowed-Origin", allowedOrigin)
 		
 		// Handle preflight OPTIONS request
 		if c.Request.Method == "OPTIONS" {
