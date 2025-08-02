@@ -158,19 +158,9 @@ func (s *paymentService) CreateCheckoutSessionWithFullInfo(items []CheckoutItem,
 		CancelURL:          stripe.String(cancelURL),
 		CustomerEmail:      stripe.String(customerInfo.Email),
 		
-		// Pre-fill customer information
-		CustomerDetails: &stripe.CheckoutSessionCustomerDetailsParams{
-			Name:  stripe.String(fmt.Sprintf("%s %s", customerInfo.FirstName, customerInfo.LastName)),
-			Email: stripe.String(customerInfo.Email),
-			Phone: stripe.String(customerInfo.Phone),
-			Address: &stripe.AddressParams{
-				Line1:      stripe.String(shippingAddress.AddressLine1),
-				Line2:      stripe.String(shippingAddress.AddressLine2),
-				City:       stripe.String(shippingAddress.City),
-				State:      stripe.String(shippingAddress.State),
-				PostalCode: stripe.String(shippingAddress.PostalCode),
-				Country:    stripe.String(shippingAddress.Country),
-			},
+		// Enable shipping address collection
+		ShippingAddressCollection: &stripe.CheckoutSessionShippingAddressCollectionParams{
+			AllowedCountries: stripe.StringSlice([]string{"US", "CA", "GB", "DE", "FR", "ES", "IT", "NL", "BE", "AT", "CH", "SE", "NO", "DK", "FI"}),
 		},
 		
 		// Pre-fill shipping address
