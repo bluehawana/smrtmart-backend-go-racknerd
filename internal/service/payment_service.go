@@ -14,7 +14,28 @@ import (
 
 type PaymentService interface {
 	CreateCheckoutSession(items []CheckoutItem, customerEmail string, successURL, cancelURL string) (*stripe.CheckoutSession, error)
+	CreateCheckoutSessionWithFullInfo(items []CheckoutItem, customerInfo CustomerInfo, shippingAddress Address, billingAddress *Address, successURL, cancelURL string) (*stripe.CheckoutSession, error)
 	HandleWebhook(payload []byte, signature string) error
+}
+
+type CustomerInfo struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+}
+
+type Address struct {
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Company      string `json:"company,omitempty"`
+	AddressLine1 string `json:"address_line1"`
+	AddressLine2 string `json:"address_line2,omitempty"`
+	City         string `json:"city"`
+	State        string `json:"state"`
+	PostalCode   string `json:"postal_code"`
+	Country      string `json:"country"`
+	Phone        string `json:"phone,omitempty"`
 }
 
 type CheckoutItem struct {
@@ -86,6 +107,125 @@ func (s *paymentService) CreateCheckoutSession(items []CheckoutItem, customerEma
 		Metadata: map[string]string{
 			"source": "smrtmart_website",
 		},
+	}
+
+	sess, err := session.New(params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create checkout session: %w", err)
+	}
+
+	return sess, nil
+}
+
+func (s *paymentService) CreateCheckoutSessionWithFullInfo(items []CheckoutItem, customerInfo CustomerInfo, shippingAddress Address, billingAddress *Address, successURL, cancelURL string) (*stripe.CheckoutSession, error) {
+	var lineItems []*stripe.CheckoutSessionLineItemParams
+
+	for _, item := range items {
+		// Convert price to cents (Stripe uses cents)
+		priceInCents := int64(item.Price * 100)
+
+		lineItem := &stripe.CheckoutSessionLineItemParams{
+			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+				Currency: stripe.String("usd"),
+				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+					Name:        stripe.String(item.Name),
+					Description: stripe.String(item.Description),
+				},
+				UnitAmount: stripe.Int64(priceInCents),
+			},
+			Quantity: stripe.Int64(int64(item.Quantity)),
+		}
+
+		// Add product images if available
+		if len(item.Images) > 0 {
+			var images []*string
+			for _, img := range item.Images {
+				// Use Supabase image URL for production
+				imageURL := fmt.Sprintf("https://mqkoydypybxgcwxioqzc.supabase.co/storage/v1/object/public/products/%s", img)
+				images = append(images, stripe.String(imageURL))
+			}
+			lineItem.PriceData.ProductData.Images = images
+		}
+
+		lineItems = append(lineItems, lineItem)
+	}
+
+	params := &stripe.CheckoutSessionParams{
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
+		LineItems:          lineItems,
+		Mode:               stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL:         stripe.String(successURL),
+		CancelURL:          stripe.String(cancelURL),
+		CustomerEmail:      stripe.String(customerInfo.Email),
+		
+		// Pre-fill customer information
+		CustomerDetails: &stripe.CheckoutSessionCustomerDetailsParams{
+			Name:  stripe.String(fmt.Sprintf("%s %s", customerInfo.FirstName, customerInfo.LastName)),
+			Email: stripe.String(customerInfo.Email),
+			Phone: stripe.String(customerInfo.Phone),
+			Address: &stripe.AddressParams{
+				Line1:      stripe.String(shippingAddress.AddressLine1),
+				Line2:      stripe.String(shippingAddress.AddressLine2),
+				City:       stripe.String(shippingAddress.City),
+				State:      stripe.String(shippingAddress.State),
+				PostalCode: stripe.String(shippingAddress.PostalCode),
+				Country:    stripe.String(shippingAddress.Country),
+			},
+		},
+		
+		// Pre-fill shipping address
+		ShippingOptions: []*stripe.CheckoutSessionShippingOptionParams{
+			{
+				ShippingRateData: &stripe.CheckoutSessionShippingOptionShippingRateDataParams{
+					Type: stripe.String("fixed_amount"),
+					FixedAmount: &stripe.CheckoutSessionShippingOptionShippingRateDataFixedAmountParams{
+						Amount:   stripe.Int64(0), // Free shipping
+						Currency: stripe.String("usd"),
+					},
+					DisplayName: stripe.String("Free Shipping"),
+				},
+			},
+			{
+				ShippingRateData: &stripe.CheckoutSessionShippingOptionShippingRateDataParams{
+					Type: stripe.String("fixed_amount"),
+					FixedAmount: &stripe.CheckoutSessionShippingOptionShippingRateDataFixedAmountParams{
+						Amount:   stripe.Int64(999), // $9.99
+						Currency: stripe.String("usd"),
+					},
+					DisplayName: stripe.String("Express Shipping"),
+					DeliveryEstimate: &stripe.CheckoutSessionShippingOptionShippingRateDataDeliveryEstimateParams{
+						Minimum: &stripe.CheckoutSessionShippingOptionShippingRateDataDeliveryEstimateMinimumParams{
+							Unit:  stripe.String("business_day"),
+							Value: stripe.Int64(1),
+						},
+						Maximum: &stripe.CheckoutSessionShippingOptionShippingRateDataDeliveryEstimateMaximumParams{
+							Unit:  stripe.String("business_day"),
+							Value: stripe.Int64(3),
+						},
+					},
+				},
+			},
+		},
+		
+		// Add metadata for order tracking
+		Metadata: map[string]string{
+			"source":                "smrtmart_website_full_info",
+			"customer_first_name":   customerInfo.FirstName,
+			"customer_last_name":    customerInfo.LastName,
+			"customer_phone":        customerInfo.Phone,
+			"shipping_address_line1": shippingAddress.AddressLine1,
+			"shipping_city":         shippingAddress.City,
+			"shipping_state":        shippingAddress.State,
+			"shipping_country":      shippingAddress.Country,
+		},
+	}
+
+	// Add billing address metadata if different from shipping
+	if billingAddress != nil {
+		params.Metadata["billing_address_line1"] = billingAddress.AddressLine1
+		params.Metadata["billing_city"] = billingAddress.City
+		params.Metadata["billing_state"] = billingAddress.State
+		params.Metadata["billing_country"] = billingAddress.Country
 	}
 
 	sess, err := session.New(params)

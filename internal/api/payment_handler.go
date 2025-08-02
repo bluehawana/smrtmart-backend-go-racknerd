@@ -92,8 +92,58 @@ func (h *PaymentHandler) CreateCheckoutSession(c *gin.Context) {
 		cancelURL = "http://localhost:3000/checkout/cancel"
 	}
 
-	// Create checkout session
-	session, err := h.service.CreateCheckoutSession(items, req.CustomerEmail, successURL, cancelURL)
+	// Check if this is a full customer info request or simple email-only request
+	var session *stripe.CheckoutSession
+	var err error
+	
+	if req.CustomerInfo.FirstName != "" && req.CustomerInfo.LastName != "" && 
+	   req.ShippingAddress.AddressLine1 != "" && req.ShippingAddress.City != "" {
+		// Full customer info checkout
+		session, err = h.service.CreateCheckoutSessionWithFullInfo(
+			items, 
+			service.CustomerInfo{
+				FirstName: req.CustomerInfo.FirstName,
+				LastName:  req.CustomerInfo.LastName,
+				Phone:     req.CustomerInfo.Phone,
+				Email:     req.CustomerInfo.Email,
+			},
+			service.Address{
+				FirstName:    req.ShippingAddress.FirstName,
+				LastName:     req.ShippingAddress.LastName,
+				Company:      req.ShippingAddress.Company,
+				AddressLine1: req.ShippingAddress.AddressLine1,
+				AddressLine2: req.ShippingAddress.AddressLine2,
+				City:         req.ShippingAddress.City,
+				State:        req.ShippingAddress.State,
+				PostalCode:   req.ShippingAddress.PostalCode,
+				Country:      req.ShippingAddress.Country,
+				Phone:        req.ShippingAddress.Phone,
+			},
+			func() *service.Address {
+				if req.BillingAddress == nil {
+					return nil
+				}
+				return &service.Address{
+					FirstName:    req.BillingAddress.FirstName,
+					LastName:     req.BillingAddress.LastName,
+					Company:      req.BillingAddress.Company,
+					AddressLine1: req.BillingAddress.AddressLine1,
+					AddressLine2: req.BillingAddress.AddressLine2,
+					City:         req.BillingAddress.City,
+					State:        req.BillingAddress.State,
+					PostalCode:   req.BillingAddress.PostalCode,
+					Country:      req.BillingAddress.Country,
+					Phone:        req.BillingAddress.Phone,
+				}
+			}(),
+			successURL, 
+			cancelURL,
+		)
+	} else {
+		// Simple email-only checkout (fallback to original method)
+		session, err = h.service.CreateCheckoutSession(items, req.CustomerEmail, successURL, cancelURL)
+	}
+	
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.APIResponse{
 			Success: false,
@@ -173,10 +223,33 @@ func (h *PaymentHandler) StripeWebhook(c *gin.Context) {
 
 // Request/Response types
 type CheckoutRequest struct {
-	Items         []CheckoutItemRequest `json:"items" binding:"required"`
-	CustomerEmail string                `json:"customer_email" binding:"required,email"`
-	SuccessURL    string                `json:"success_url,omitempty"`
-	CancelURL     string                `json:"cancel_url,omitempty"`
+	Items           []CheckoutItemRequest `json:"items" binding:"required"`
+	CustomerEmail   string                `json:"customer_email" binding:"required,email"`
+	CustomerInfo    CustomerInfo          `json:"customer_info,omitempty"`
+	ShippingAddress Address               `json:"shipping_address,omitempty"`
+	BillingAddress  *Address              `json:"billing_address,omitempty"` // Optional, if different from shipping
+	SuccessURL      string                `json:"success_url,omitempty"`
+	CancelURL       string                `json:"cancel_url,omitempty"`
+}
+
+type CustomerInfo struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+}
+
+type Address struct {
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Company      string `json:"company,omitempty"`
+	AddressLine1 string `json:"address_line1"`
+	AddressLine2 string `json:"address_line2,omitempty"`
+	City         string `json:"city"`
+	State        string `json:"state"`
+	PostalCode   string `json:"postal_code"`
+	Country      string `json:"country"`
+	Phone        string `json:"phone,omitempty"`
 }
 
 type CheckoutItemRequest struct {
