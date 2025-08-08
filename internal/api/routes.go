@@ -21,12 +21,21 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 			"version": "1.0.0",
 		})
 	})
-
+	
 	// Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")
+	
+	// Health check endpoint for API v1
+	v1.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "healthy",
+			"service": "SmartMart API v1",
+			"version": "1.0.0",
+		})
+	})
 	{
 		// Public routes
 		public := v1.Group("/")
@@ -77,7 +86,8 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 			orders := public.Group("/orders")
 			{
 				orderHandler := NewOrderHandler(services.Order)
-				orders.POST("/checkout", orderHandler.CreateOrder)
+				paymentHandler := NewPaymentHandler(services.Payment)
+				orders.POST("/checkout", paymentHandler.CreateCheckoutSession)
 			}
 
 			// Payment webhooks
