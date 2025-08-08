@@ -85,7 +85,6 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 			// Orders (checkout)
 			orders := public.Group("/orders")
 			{
-				orderHandler := NewOrderHandler(services.Order)
 				paymentHandler := NewPaymentHandler(services.Payment)
 				orders.POST("/checkout", paymentHandler.CreateCheckoutSession)
 			}
