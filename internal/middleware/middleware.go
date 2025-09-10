@@ -21,6 +21,14 @@ func CORS(allowedOrigins []string) gin.HandlerFunc {
 				allowedOrigin = origin
 				break
 			}
+			// Handle wildcard patterns for Vercel domains
+			if strings.HasPrefix(allowed, "*.") {
+				domain := strings.TrimPrefix(allowed, "*.")
+				if strings.HasSuffix(origin, "."+domain) {
+					allowedOrigin = origin
+					break
+				}
+			}
 		}
 		
 		// If no specific origins provided, allow common production domains
