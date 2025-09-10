@@ -5,7 +5,7 @@
 
 R2_BUCKET_NAME="smrtmart"
 R2_ENDPOINT="https://2a35af424f8734e497a5d707344d79d5.r2.cloudflarestorage.com"
-R2_PUBLIC_DOMAIN="https://2a35af424f8734e497a5d707344d79d5.r2.cloudflarestorage.com/smrtmart"
+R2_PUBLIC_DOMAIN="https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev"
 
 echo "🚀 Uploading SmrtMart product images to Cloudflare R2..."
 
