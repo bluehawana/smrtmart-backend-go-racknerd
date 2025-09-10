@@ -1,0 +1,39 @@
+{
+  "name": "SmartMart Go Backend",
+  "description": "SmartMart e-commerce backend built with Go and Supabase PostgreSQL",
+  "repository": "https://github.com/bluehawana/smrtmart-go-postgresql",
+  "keywords": ["go", "gin", "postgresql", "supabase", "ecommerce", "api"],
+  "env": {
+    "GIN_MODE": {
+      "description": "Gin framework mode",
+      "value": "release"
+    },
+    "DB_SSLMODE": {
+      "description": "PostgreSQL SSL mode",
+      "value": "require"
+    },
+    "DATABASE_URL": {
+      "description": "Supabase PostgreSQL connection string",
+      "required": true
+    },
+    "SUPABASE_URL": {
+      "description": "Supabase project URL",
+      "required": false
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Supabase anonymous key",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/go"
+    }
+  ]
+}
