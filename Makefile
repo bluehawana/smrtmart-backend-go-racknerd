@@ -76,11 +76,11 @@ docker-logs:
 # Database migration commands
 migrate-up:
 	@echo "Running database migrations..."
-	migrate -path migrations -database "postgres://postgres:postgres123@localhost:5432/smrtmart_db?sslmode=disable" up
+	migrate -path migrations -database "$(DATABASE_URL)" up
 
 migrate-down:
 	@echo "Rolling back database migrations..."
-	migrate -path migrations -database "postgres://postgres:postgres123@localhost:5432/smrtmart_db?sslmode=disable" down
+	migrate -path migrations -database "$(DATABASE_URL)" down
 
 migrate-create:
 	@echo "Creating new migration..."

@@ -223,7 +223,7 @@ MAX_UPLOAD_SIZE=10485760  # 10MB
 ```bash
 # Run migrations on production database
 migrate -path migrations \
-  -database "postgres://user:pass@host:5432/dbname?sslmode=require" \
+  -database "$DATABASE_URL" \
   up
 ```
 
