@@ -95,7 +95,7 @@ func Load() *Config {
 		Server: ServerConfig{
 			Port:        getEnv("PORT", "8080"),
 			Mode:        getEnv("GIN_MODE", "debug"),
-			CORSOrigins: strings.Split(getEnv("CORS_ORIGINS", "http://localhost:3000"), ","),
+			CORSOrigins: strings.Split(getEnv("CORS_ORIGINS", "http://localhost:3000,https://smrtmart.com,https://www.smrtmart.com"), ","),
 		},
 		JWT: JWTConfig{
 			Secret: getEnv("JWT_SECRET", "your-secret-key"),
