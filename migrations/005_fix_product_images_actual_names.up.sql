@@ -1,5 +1,5 @@
--- Update product images to use Cloudflare R2 URLs
--- Using R2 public domain: https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev
+-- Update product images to use actual uploaded filenames with proper URL encoding
+-- Using R2 public domain: https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/
 
 -- MacBook Pro 16-inch
 UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbook.jpg'] 
@@ -30,11 +30,11 @@ UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c
 WHERE name LIKE '%Apple Watch Ultra%';
 
 -- Huawei GT 2 Pro / Watch GT series
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/huawei-gt2-pro.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/huaweismartwatch.jpg']
 WHERE name LIKE '%Huawei%' AND name LIKE '%Watch%';
 
 -- iPhone 16 Pro Max Case
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/iphone16-promax-case.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/iphone16%20promaxcase.jpg']
 WHERE name LIKE '%iPhone%' AND name LIKE '%Case%' AND name LIKE '%16%';
 
 -- MagSafe Case for iPhone
@@ -46,19 +46,19 @@ UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c
 WHERE name LIKE '%MacBook Air%' AND name LIKE '%Case%' AND name LIKE '%Green%';
 
 -- MacBook Air M3 Weaving Case  
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbookair-m3-weaving-case.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbookair%20m3%20weaving%20case.jpg']
 WHERE name LIKE '%MacBook Air%' AND name LIKE '%Weaving%';
 
 -- MacBook M4 Charging Cable
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbook-m4-charging-cable.png']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbook%20m4%20charging%20cable.png']
 WHERE name LIKE '%MacBook%' AND name LIKE '%M4%' AND name LIKE '%Charging%';
 
 -- MacBook Air Adapter and Cable
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbookair-adaptor-cable.png']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/macbookair%20adaptor%20and%20cable.png']
 WHERE name LIKE '%MacBook Air%' AND (name LIKE '%Adapter%' OR name LIKE '%Adaptor%') AND name LIKE '%Cable%';
 
 -- 8K Data Cable Dell
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/8k-data-cable-dell.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/8k%20data%20cable%20dell.jpg']
 WHERE name LIKE '%8K%' AND name LIKE '%Dell%';
 
 -- Dell Thunderbolt Cable
@@ -66,7 +66,7 @@ UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c
 WHERE name LIKE '%Dell%' AND name LIKE '%Thunderbolt%';
 
 -- USB-C iPhone Cable
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/usb-c-iphone-cable.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/usb%20c%20iphone%20cable.jpg']
 WHERE name LIKE '%USB-C%' AND name LIKE '%iPhone%';
 
 -- Magnetic Charging Cable
@@ -82,11 +82,15 @@ UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c
 WHERE name LIKE '%Apple%' AND name LIKE '%29W%';
 
 -- M Tracking Tag / AirTag Alternative
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/m-tracking-tag.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/mtrackingtag.jpg']
 WHERE name LIKE '%Tracking%' AND name LIKE '%Tag%';
 
+-- MTag Tracker
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/mtag-tracker.jpg']
+WHERE name LIKE '%MTag%' OR name LIKE '%M-Tag%';
+
 -- Smart Tracking Card
-UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/smart-tracking-card.jpg']
+UPDATE products SET images = ARRAY['https://pub-f181c83ced9f499bbd048ab1e553216c.r2.dev/uploads/smart%20tracking%20card.jpg']
 WHERE name LIKE '%Smart%' AND name LIKE '%Tracking%' AND name LIKE '%Card%';
 
 -- AI Translate Pro
