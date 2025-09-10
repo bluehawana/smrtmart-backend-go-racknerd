@@ -1,6 +1,5 @@
 scripts/
 uploads/
-*.sql
 update_*.sql
 *.md
 .env.example
