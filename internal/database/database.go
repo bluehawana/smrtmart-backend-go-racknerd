@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"embed"
 	"fmt"
 	"net/url"
 	"os"
@@ -12,8 +13,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
 
 func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
 	var dsn string
@@ -45,7 +48,7 @@ func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-func RunMigrations(cfg config.DatabaseConfig) error {
+func RunMigrations(cfg config.DatabaseConfig, migrationFS embed.FS) error {
 	var dsn string
 	
 	// Check if JAWSDB_URL is available (Heroku MySQL addon)
@@ -70,25 +73,15 @@ func RunMigrations(cfg config.DatabaseConfig) error {
 		return fmt.Errorf("failed to create mysql driver: %w", err)
 	}
 
-	// Try different possible migration paths for different environments
-	migrationPaths := []string{
-		"file://migrations",
-		"file://./migrations", 
-		"file:///app/migrations",
+	// Use embedded migration files
+	sourceDriver, err := iofs.New(migrationFS, "migrations")
+	if err != nil {
+		return fmt.Errorf("failed to create embedded migration source: %w", err)
 	}
 	
-	var m *migrate.Migrate
-	var migrationErr error
-	
-	for _, path := range migrationPaths {
-		m, migrationErr = migrate.NewWithDatabaseInstance(path, "mysql", driver)
-		if migrationErr == nil {
-			break
-		}
-	}
-	
-	if migrationErr != nil {
-		return fmt.Errorf("failed to create migrate instance with any path: %w", migrationErr)
+	m, err := migrate.NewWithSourceInstance("iofs", sourceDriver, "mysql", driver)
+	if err != nil {
+		return fmt.Errorf("failed to create migrate instance: %w", err)
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {

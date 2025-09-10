@@ -63,30 +63,30 @@ type RedisConfig struct {
 func Load() *Config {
 	var dbConfig DatabaseConfig
 	
-	// Check for JawsDB URL first (Heroku MySQL addon)
-	if jawsDBURL := getEnv("JAWSDB_URL", ""); jawsDBURL != "" {
+	// Check for DATABASE_URL first (Heroku PostgreSQL)
+	if databaseURL := getEnv("DATABASE_URL", ""); databaseURL != "" {
 		var err error
-		dbConfig, err = parseJawsDBURL(jawsDBURL)
+		dbConfig, err = parsePostgreSQLURL(databaseURL)
 		if err != nil {
 			// Fallback to individual env vars if URL parsing fails
 			dbConfig = DatabaseConfig{
 				Host:     getEnv("DB_HOST", "localhost"),
-				Port:     getEnv("DB_PORT", "3306"),
-				User:     getEnv("DB_USER", "root"),
+				Port:     getEnv("DB_PORT", "5432"),
+				User:     getEnv("DB_USER", "postgres"),
 				Password: getEnv("DB_PASSWORD", ""),
-				Name:     getEnv("DB_NAME", "smrtmart_db"),
-				SSLMode:  getEnv("DB_SSLMODE", "false"),
+				Name:     getEnv("DB_NAME", "postgres"),
+				SSLMode:  getEnv("DB_SSLMODE", "require"),
 			}
 		}
 	} else {
 		// Use individual environment variables
 		dbConfig = DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
-			Port:     getEnv("DB_PORT", "3306"),
-			User:     getEnv("DB_USER", "root"),
+			Port:     getEnv("DB_PORT", "5432"),
+			User:     getEnv("DB_USER", "postgres"),
 			Password: getEnv("DB_PASSWORD", ""),
-			Name:     getEnv("DB_NAME", "smrtmart_db"),
-			SSLMode:  getEnv("DB_SSLMODE", "false"),
+			Name:     getEnv("DB_NAME", "postgres"),
+			SSLMode:  getEnv("DB_SSLMODE", "require"),
 		}
 	}
 	
@@ -138,22 +138,26 @@ func getEnvAsInt64(key string, defaultValue int64) int64 {
 	return defaultValue
 }
 
-// parseJawsDBURL parses a JawsDB MySQL URL into DatabaseConfig
-// Format: mysql://username:password@hostname:port/database
-func parseJawsDBURL(jawsDBURL string) (DatabaseConfig, error) {
-	parsedURL, err := url.Parse(jawsDBURL)
+// parsePostgreSQLURL parses a PostgreSQL URL into DatabaseConfig
+// Format: postgresql://username:password@hostname:port/database
+func parsePostgreSQLURL(databaseURL string) (DatabaseConfig, error) {
+	parsedURL, err := url.Parse(databaseURL)
 	if err != nil {
-		return DatabaseConfig{}, fmt.Errorf("failed to parse JawsDB URL: %w", err)
+		return DatabaseConfig{}, fmt.Errorf("failed to parse DATABASE_URL: %w", err)
 	}
 
 	password, _ := parsedURL.User.Password()
+	port := parsedURL.Port()
+	if port == "" {
+		port = "5432" // Default PostgreSQL port
+	}
 	
 	return DatabaseConfig{
 		Host:     parsedURL.Hostname(),
-		Port:     parsedURL.Port(),
+		Port:     port,
 		User:     parsedURL.User.Username(),
 		Password: password,
 		Name:     strings.TrimPrefix(parsedURL.Path, "/"),
-		SSLMode:  "false", // JawsDB typically doesn't require SSL
+		SSLMode:  "require", // Default for hosted PostgreSQL
 	}, nil
 }

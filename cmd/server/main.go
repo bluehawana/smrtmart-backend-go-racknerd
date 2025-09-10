@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"log"
 	"os"
 
@@ -14,6 +15,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+//go:embed migrations/*.sql
+var migrationFiles embed.FS
 
 // @title SmrtMart API
 // @version 1.0
