@@ -70,11 +70,25 @@ func RunMigrations(cfg config.DatabaseConfig) error {
 		return fmt.Errorf("failed to create mysql driver: %w", err)
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(
+	// Try different possible migration paths for different environments
+	migrationPaths := []string{
 		"file://migrations",
-		"mysql", driver)
-	if err != nil {
-		return fmt.Errorf("failed to create migrate instance: %w", err)
+		"file://./migrations", 
+		"file:///app/migrations",
+	}
+	
+	var m *migrate.Migrate
+	var migrationErr error
+	
+	for _, path := range migrationPaths {
+		m, migrationErr = migrate.NewWithDatabaseInstance(path, "mysql", driver)
+		if migrationErr == nil {
+			break
+		}
+	}
+	
+	if migrationErr != nil {
+		return fmt.Errorf("failed to create migrate instance with any path: %w", migrationErr)
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
