@@ -2,37 +2,23 @@ package database
 
 import (
 	"database/sql"
-	"embed"
 	"fmt"
-	"net/url"
-	"os"
-	"strings"
 
 	"smrtmart-go-postgresql/internal/config"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/mysql"
-	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 
 func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
-	var dsn string
-	
-	// Check if JAWSDB_URL is available (Heroku MySQL addon)
-	if jawsDBURL := os.Getenv("JAWSDB_URL"); jawsDBURL != "" {
-		// JawsDB URL format: mysql://username:password@hostname:port/database
-		// Convert to MySQL DSN format: username:password@tcp(hostname:port)/database
-		dsn = convertJawsDBURLToMySQLDSN(jawsDBURL)
-	} else {
-		// MySQL DSN format: user:password@tcp(host:port)/database?parseTime=true
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
-	}
+	// PostgreSQL DSN format: host=host port=port user=user password=password dbname=dbname sslmode=sslmode
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
 
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -48,38 +34,24 @@ func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-func RunMigrations(cfg config.DatabaseConfig, migrationFS embed.FS) error {
-	var dsn string
-	
-	// Check if JAWSDB_URL is available (Heroku MySQL addon)
-	if jawsDBURL := os.Getenv("JAWSDB_URL"); jawsDBURL != "" {
-		// JawsDB URL format: mysql://username:password@hostname:port/database
-		// Convert to MySQL DSN format: username:password@tcp(hostname:port)/database
-		dsn = convertJawsDBURLToMySQLDSN(jawsDBURL)
-	} else {
-		// MySQL DSN format: user:password@tcp(host:port)/database?parseTime=true
-		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
-	}
+func RunMigrations(cfg config.DatabaseConfig) error {
+	// PostgreSQL DSN
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
 
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to open database for migrations: %w", err)
 	}
 	defer db.Close()
 
-	driver, err := mysql.WithInstance(db, &mysql.Config{})
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to create mysql driver: %w", err)
+		return fmt.Errorf("failed to create postgres driver: %w", err)
 	}
 
-	// Use embedded migration files
-	sourceDriver, err := iofs.New(migrationFS, "migrations")
-	if err != nil {
-		return fmt.Errorf("failed to create embedded migration source: %w", err)
-	}
-	
-	m, err := migrate.NewWithSourceInstance("iofs", sourceDriver, "mysql", driver)
+	// Use file-based migrations from the migrations directory
+	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
 	if err != nil {
 		return fmt.Errorf("failed to create migrate instance: %w", err)
 	}
@@ -89,24 +61,4 @@ func RunMigrations(cfg config.DatabaseConfig, migrationFS embed.FS) error {
 	}
 
 	return nil
-}
-
-// convertJawsDBURLToMySQLDSN converts JawsDB URL to MySQL DSN format
-// Input: mysql://username:password@hostname:port/database
-// Output: username:password@tcp(hostname:port)/database?parseTime=true
-func convertJawsDBURLToMySQLDSN(jawsDBURL string) string {
-	parsedURL, err := url.Parse(jawsDBURL)
-	if err != nil {
-		// Return empty string if parsing fails
-		return ""
-	}
-
-	password, _ := parsedURL.User.Password()
-	username := parsedURL.User.Username()
-	hostname := parsedURL.Hostname()
-	port := parsedURL.Port()
-	database := strings.TrimPrefix(parsedURL.Path, "/")
-
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		username, password, hostname, port, database)
 }

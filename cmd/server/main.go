@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"log"
 	"os"
 
@@ -16,8 +15,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//go:embed ../../migrations/*.sql
-var migrationFiles embed.FS
+// Migration files are now accessed directly from the migrations directory
 
 // @title SmrtMart API
 // @version 1.0
