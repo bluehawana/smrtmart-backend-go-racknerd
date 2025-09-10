@@ -1,6 +1,6 @@
--- Fix Dell XPS 15 Developer Edition image to use the correct dell-xps-15-2023.jpg file
+-- MySQL version - Fix Dell XPS 15 Developer Edition image to use the correct dell-xps-15-2023.jpg file
 UPDATE products 
-SET images = ARRAY['https://mqkoydypybxgcwxioqzc.supabase.co/storage/v1/object/public/products/dell-xps-15-2023.jpg']
+SET images = JSON_ARRAY('https://d10qehs4k3bdf9.cloudfront.net/dell-xps-15-2023.jpg')
 WHERE name = 'Dell XPS 15 Developer Edition';
 
 -- Also update the description to be more specific

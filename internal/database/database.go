@@ -3,28 +3,33 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 
 	"smrtmart-go-postgresql/internal/config"
 
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
 	var dsn string
 	
-	// Check if DATABASE_URL is available (Heroku)
-	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
-		dsn = databaseURL
+	// Check if JAWSDB_URL is available (Heroku MySQL addon)
+	if jawsDBURL := os.Getenv("JAWSDB_URL"); jawsDBURL != "" {
+		// JawsDB URL format: mysql://username:password@hostname:port/database
+		// Convert to MySQL DSN format: username:password@tcp(hostname:port)/database
+		dsn = convertJawsDBURLToMySQLDSN(jawsDBURL)
 	} else {
-		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
+		// MySQL DSN format: user:password@tcp(host:port)/database?parseTime=true
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
 	}
 
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -43,28 +48,31 @@ func Initialize(cfg config.DatabaseConfig) (*sql.DB, error) {
 func RunMigrations(cfg config.DatabaseConfig) error {
 	var dsn string
 	
-	// Check if DATABASE_URL is available (Heroku)
-	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
-		dsn = databaseURL
+	// Check if JAWSDB_URL is available (Heroku MySQL addon)
+	if jawsDBURL := os.Getenv("JAWSDB_URL"); jawsDBURL != "" {
+		// JawsDB URL format: mysql://username:password@hostname:port/database
+		// Convert to MySQL DSN format: username:password@tcp(hostname:port)/database
+		dsn = convertJawsDBURLToMySQLDSN(jawsDBURL)
 	} else {
-		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name, cfg.SSLMode)
+		// MySQL DSN format: user:password@tcp(host:port)/database?parseTime=true
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+			cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
 	}
 
-	db, err := sql.Open("postgres", dsn)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to open database for migrations: %w", err)
 	}
 	defer db.Close()
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to create postgres driver: %w", err)
+		return fmt.Errorf("failed to create mysql driver: %w", err)
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrations",
-		"postgres", driver)
+		"mysql", driver)
 	if err != nil {
 		return fmt.Errorf("failed to create migrate instance: %w", err)
 	}
@@ -74,4 +82,24 @@ func RunMigrations(cfg config.DatabaseConfig) error {
 	}
 
 	return nil
+}
+
+// convertJawsDBURLToMySQLDSN converts JawsDB URL to MySQL DSN format
+// Input: mysql://username:password@hostname:port/database
+// Output: username:password@tcp(hostname:port)/database?parseTime=true
+func convertJawsDBURLToMySQLDSN(jawsDBURL string) string {
+	parsedURL, err := url.Parse(jawsDBURL)
+	if err != nil {
+		// Return empty string if parsing fails
+		return ""
+	}
+
+	password, _ := parsedURL.User.Password()
+	username := parsedURL.User.Username()
+	hostname := parsedURL.Hostname()
+	port := parsedURL.Port()
+	database := strings.TrimPrefix(parsedURL.Path, "/")
+
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		username, password, hostname, port, database)
 }

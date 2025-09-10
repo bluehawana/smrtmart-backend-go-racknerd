@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -59,15 +61,37 @@ type RedisConfig struct {
 }
 
 func Load() *Config {
-	return &Config{
-		Database: DatabaseConfig{
+	var dbConfig DatabaseConfig
+	
+	// Check for JawsDB URL first (Heroku MySQL addon)
+	if jawsDBURL := getEnv("JAWSDB_URL", ""); jawsDBURL != "" {
+		var err error
+		dbConfig, err = parseJawsDBURL(jawsDBURL)
+		if err != nil {
+			// Fallback to individual env vars if URL parsing fails
+			dbConfig = DatabaseConfig{
+				Host:     getEnv("DB_HOST", "localhost"),
+				Port:     getEnv("DB_PORT", "3306"),
+				User:     getEnv("DB_USER", "root"),
+				Password: getEnv("DB_PASSWORD", ""),
+				Name:     getEnv("DB_NAME", "smrtmart_db"),
+				SSLMode:  getEnv("DB_SSLMODE", "false"),
+			}
+		}
+	} else {
+		// Use individual environment variables
+		dbConfig = DatabaseConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
-			Port:     getEnv("DB_PORT", "5432"),
-			User:     getEnv("DB_USER", "postgres"),
+			Port:     getEnv("DB_PORT", "3306"),
+			User:     getEnv("DB_USER", "root"),
 			Password: getEnv("DB_PASSWORD", ""),
 			Name:     getEnv("DB_NAME", "smrtmart_db"),
-			SSLMode:  getEnv("DB_SSLMODE", "disable"),
-		},
+			SSLMode:  getEnv("DB_SSLMODE", "false"),
+		}
+	}
+	
+	return &Config{
+		Database: dbConfig,
 		Server: ServerConfig{
 			Port:        getEnv("PORT", "8080"),
 			Mode:        getEnv("GIN_MODE", "debug"),
@@ -112,4 +136,24 @@ func getEnvAsInt64(key string, defaultValue int64) int64 {
 		}
 	}
 	return defaultValue
+}
+
+// parseJawsDBURL parses a JawsDB MySQL URL into DatabaseConfig
+// Format: mysql://username:password@hostname:port/database
+func parseJawsDBURL(jawsDBURL string) (DatabaseConfig, error) {
+	parsedURL, err := url.Parse(jawsDBURL)
+	if err != nil {
+		return DatabaseConfig{}, fmt.Errorf("failed to parse JawsDB URL: %w", err)
+	}
+
+	password, _ := parsedURL.User.Password()
+	
+	return DatabaseConfig{
+		Host:     parsedURL.Hostname(),
+		Port:     parsedURL.Port(),
+		User:     parsedURL.User.Username(),
+		Password: password,
+		Name:     strings.TrimPrefix(parsedURL.Path, "/"),
+		SSLMode:  "false", // JawsDB typically doesn't require SSL
+	}, nil
 }
