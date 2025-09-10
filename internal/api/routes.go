@@ -40,6 +40,9 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 		// Public routes
 		public := v1.Group("/")
 		{
+			// Temporary migration endpoint (remove after use)
+			migrationHandler := NewMigrationHandler(cfg)
+			public.POST("/setup/migrate", migrationHandler.RunMigrations)
 			// Products
 			products := public.Group("/products")
 			{
