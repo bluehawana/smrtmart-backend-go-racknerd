@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"regexp"
 
 	"smrtmart-go-postgresql/internal/models"
 	"smrtmart-go-postgresql/internal/repository"
@@ -112,20 +113,45 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 // @Router /products/{id} [get]
 func (h *ProductHandler) GetProduct(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := uuid.Parse(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, models.APIResponse{
-			Success: false,
-			Message: "Invalid product ID",
-			Error: &models.APIError{
-				Code:    "INVALID_ID",
-				Message: "Product ID must be a valid UUID",
-			},
-		})
-		return
+	
+	// Check if the ID is numeric (1-50) or UUID format
+	var product *models.Product
+	var err error
+	
+	// Try parsing as numeric ID first (simpler and more user-friendly)
+	if numericID, numErr := strconv.Atoi(idStr); numErr == nil && numericID >= 1 && numericID <= 50 {
+		// It's a valid numeric ID, get product by numeric_id
+		product, err = h.service.GetProductByNumericID(numericID)
+	} else {
+		// Try parsing as UUID
+		uuidRegex := regexp.MustCompile(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`)
+		if !uuidRegex.MatchString(idStr) {
+			c.JSON(http.StatusBadRequest, models.APIResponse{
+				Success: false,
+				Message: "Invalid product ID format",
+				Error: &models.APIError{
+					Code:    "INVALID_ID",
+					Message: "Product ID must be a valid UUID or numeric ID (1-50)",
+				},
+			})
+			return
+		}
+		
+		id, parseErr := uuid.Parse(idStr)
+		if parseErr != nil {
+			c.JSON(http.StatusBadRequest, models.APIResponse{
+				Success: false,
+				Message: "Invalid UUID format",
+				Error: &models.APIError{
+					Code:    "INVALID_UUID",
+					Message: "Product UUID is malformed",
+				},
+			})
+			return
+		}
+		
+		product, err = h.service.GetProduct(id)
 	}
-
-	product, err := h.service.GetProduct(id)
 	if err != nil {
 		if err.Error() == "product not found" {
 			c.JSON(http.StatusNotFound, models.APIResponse{

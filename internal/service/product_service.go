@@ -12,6 +12,7 @@ import (
 type ProductService interface {
 	CreateProduct(product *models.Product) error
 	GetProduct(id uuid.UUID) (*models.Product, error)
+	GetProductByNumericID(numericID int) (*models.Product, error)
 	GetProducts(filters repository.ProductFilters) (*models.PaginatedResponse, error)
 	UpdateProduct(product *models.Product) error
 	DeleteProduct(id uuid.UUID) error
@@ -62,6 +63,22 @@ func (s *productService) GetProduct(id uuid.UUID) (*models.Product, error) {
 	}
 
 	product, err := s.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if product == nil {
+		return nil, errors.New("product not found")
+	}
+
+	return product, nil
+}
+
+func (s *productService) GetProductByNumericID(numericID int) (*models.Product, error) {
+	if numericID < 1 || numericID > 50 {
+		return nil, errors.New("invalid numeric product ID")
+	}
+
+	product, err := s.repo.GetByNumericID(numericID)
 	if err != nil {
 		return nil, err
 	}

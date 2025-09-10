@@ -15,6 +15,7 @@ import (
 type ProductRepository interface {
 	Create(product *models.Product) error
 	GetByID(id uuid.UUID) (*models.Product, error)
+	GetByNumericID(numericID int) (*models.Product, error)
 	GetAll(filters ProductFilters) ([]*models.Product, int, error)
 	Update(product *models.Product) error
 	Delete(id uuid.UUID) error
@@ -77,6 +78,42 @@ func (r *productRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 	var dimensionsJSON, seoJSON []byte
 	
 	err := r.db.QueryRow(query, id).Scan(
+		&product.ID, &product.VendorID, &product.Name, &product.Description,
+		&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
+		pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
+		&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
+		&seoJSON, &product.CreatedAt, &product.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse JSON fields
+	if dimensionsJSON != nil {
+		json.Unmarshal(dimensionsJSON, &product.Dimensions)
+	}
+	if seoJSON != nil {
+		json.Unmarshal(seoJSON, &product.SEO)
+	}
+
+	return product, nil
+}
+
+func (r *productRepository) GetByNumericID(numericID int) (*models.Product, error) {
+	query := `
+		SELECT id, vendor_id, name, description, price, compare_price, sku,
+			category, tags, images, stock, status, featured, weight, dimensions,
+			seo, created_at, updated_at
+		FROM products WHERE numeric_id = $1`
+
+	product := &models.Product{}
+	var dimensionsJSON, seoJSON []byte
+	
+	err := r.db.QueryRow(query, numericID).Scan(
 		&product.ID, &product.VendorID, &product.Name, &product.Description,
 		&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 		pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
