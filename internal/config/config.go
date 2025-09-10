@@ -151,6 +151,12 @@ func parsePostgreSQLURL(databaseURL string) (DatabaseConfig, error) {
 	if port == "" {
 		port = "5432" // Default PostgreSQL port
 	}
+
+	// Extract SSL mode from query parameters
+	sslMode := "require" // Default for hosted PostgreSQL
+	if sslModeParam := parsedURL.Query().Get("sslmode"); sslModeParam != "" {
+		sslMode = sslModeParam
+	}
 	
 	return DatabaseConfig{
 		Host:     parsedURL.Hostname(),
@@ -158,6 +164,6 @@ func parsePostgreSQLURL(databaseURL string) (DatabaseConfig, error) {
 		User:     parsedURL.User.Username(),
 		Password: password,
 		Name:     strings.TrimPrefix(parsedURL.Path, "/"),
-		SSLMode:  "require", // Default for hosted PostgreSQL
+		SSLMode:  sslMode,
 	}, nil
 }
