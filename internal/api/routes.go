@@ -208,6 +208,11 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 				orders.GET("", orderHandler.GetAllOrders)
 				orders.PUT("/:id/status", orderHandler.UpdateOrderStatus)
 			}
+
+			// Database migration management
+			migrationHandler := NewMigrationHandler(cfg)
+			admin.POST("/migrate", migrationHandler.RunMigrations)
+			admin.GET("/migrate/status", migrationHandler.GetMigrationStatus)
 		}
 
 		// File upload routes
