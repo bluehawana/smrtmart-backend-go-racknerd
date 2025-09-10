@@ -17,7 +17,7 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "healthy",
-			"service": "SmartMart API",
+			"service": "SmrtMart API",
 			"version": "1.0.0",
 		})
 	})
@@ -32,7 +32,7 @@ func SetupRoutes(router *gin.Engine, services *service.Services, cfg *config.Con
 	v1.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "healthy",
-			"service": "SmartMart API v1",
+			"service": "SmrtMart API v1",
 			"version": "1.0.0",
 		})
 	})

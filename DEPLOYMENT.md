@@ -1,4 +1,4 @@
-# 🚀 SmartMart Cloud Deployment Guide
+# 🚀 SmrtMart Cloud Deployment Guide
 
 ## Backend Deployment (Heroku + PostgreSQL)
 

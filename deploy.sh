@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 SmartMart Go Backend Deployment Script"
+echo "🚀 SmrtMart Go Backend Deployment Script"
 echo "=========================================="
 
 # Check if we're on dev branch

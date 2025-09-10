@@ -15,12 +15,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// @title SmartMart API
+// @title SmrtMart API
 // @version 1.0
 // @description Professional ecommerce platform API for SME digitalization
 // @termsOfService https://smrtmart.com/terms
 
-// @contact.name SmartMart Support
+// @contact.name SmrtMart Support
 // @contact.url https://smrtmart.com/support
 // @contact.email support@smrtmart.com
 
@@ -86,7 +86,7 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("🚀 SmartMart API server starting on port %s", port)
+	log.Printf("🚀 SmrtMart API server starting on port %s", port)
 	log.Printf("📚 API Documentation: http://localhost:%s/swagger/index.html", port)
 	
 	if err := router.Run(":" + port); err != nil {

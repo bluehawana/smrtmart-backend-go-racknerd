@@ -1,4 +1,4 @@
-# 🚀 SmartMart Go Backend API
+# 🚀 SmrtMart Go Backend API
 
 A professional ecommerce platform API built with **Go**, designed to help SMEs achieve digitalization through online selling, business management, and advertising solutions.
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 SmartMart Go Backend - Heroku Deployment with PostgreSQL"
+echo "🚀 SmrtMart Go Backend - Heroku Deployment with PostgreSQL"
 echo "=========================================================="
 
 # Check if logged into Heroku

@@ -1,6 +1,6 @@
 {
-  "name": "SmartMart Go Backend",
-  "description": "SmartMart e-commerce backend built with Go and Supabase PostgreSQL",
+  "name": "SmrtMart Go Backend",
+  "description": "SmrtMart e-commerce backend built with Go and Supabase PostgreSQL",
   "repository": "https://github.com/bluehawana/smrtmart-go-postgresql",
   "keywords": ["go", "gin", "postgresql", "supabase", "ecommerce", "api"],
   "env": {

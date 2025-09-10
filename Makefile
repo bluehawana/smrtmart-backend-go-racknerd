@@ -1,4 +1,4 @@
-# SmartMart Backend Makefile
+# SmrtMart Backend Makefile
 
 .PHONY: help build run test clean docker-build docker-run docker-stop migrate-up migrate-down
 
@@ -20,12 +20,12 @@ help:
 
 # Build the application
 build:
-	@echo "Building SmartMart API..."
+	@echo "Building SmrtMart API..."
 	go build -o bin/smrtmart-api ./cmd/server
 
 # Run the application locally
 run:
-	@echo "Starting SmartMart API..."
+	@echo "Starting SmrtMart API..."
 	go run ./cmd/server/main.go
 
 # Run tests
