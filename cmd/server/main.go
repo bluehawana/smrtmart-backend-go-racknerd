@@ -16,7 +16,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//go:embed migrations/*.sql
+//go:embed ../../migrations/*.sql
 var migrationFiles embed.FS
 
 // @title SmrtMart API
