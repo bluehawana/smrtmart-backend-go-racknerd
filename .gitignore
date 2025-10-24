@@ -51,3 +51,7 @@ uploads/*
 *.tmp
 *.temp
 .vercel
+
+# Sensitive backup files
+ENVIRONMENT_BACKUP.md
+*_BACKUP.md
