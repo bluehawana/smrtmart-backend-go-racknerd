@@ -47,10 +47,10 @@ func NewProductRepository(db *sql.DB) ProductRepository {
 
 func (r *productRepository) Create(product *models.Product) error {
 	query := `
-		INSERT INTO products (id, vendor_id, name, description, price, compare_price, sku, 
+		INSERT INTO products (id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions, seo)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-		RETURNING created_at, updated_at`
+		RETURNING numeric_id, created_at, updated_at`
 
 	if product.ID == uuid.Nil {
 		product.ID = uuid.New()
@@ -62,23 +62,23 @@ func (r *productRepository) Create(product *models.Product) error {
 		pq.Array(product.Tags), pq.Array(product.Images), product.Stock,
 		product.Status, product.Featured, product.Weight, product.Dimensions,
 		product.SEO,
-	).Scan(&product.CreatedAt, &product.UpdatedAt)
+	).Scan(&product.NumericID, &product.CreatedAt, &product.UpdatedAt)
 
 	return err
 }
 
 func (r *productRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 	query := `
-		SELECT id, vendor_id, name, description, price, compare_price, sku,
+		SELECT id, numeric_id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions,
 			seo, created_at, updated_at
 		FROM products WHERE id = $1`
 
 	product := &models.Product{}
 	var dimensionsJSON, seoJSON []byte
-	
+
 	err := r.db.QueryRow(query, id).Scan(
-		&product.ID, &product.VendorID, &product.Name, &product.Description,
+		&product.ID, &product.NumericID, &product.VendorID, &product.Name, &product.Description,
 		&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 		pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
 		&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
@@ -105,16 +105,16 @@ func (r *productRepository) GetByID(id uuid.UUID) (*models.Product, error) {
 
 func (r *productRepository) GetByNumericID(numericID int) (*models.Product, error) {
 	query := `
-		SELECT id, vendor_id, name, description, price, compare_price, sku,
+		SELECT id, numeric_id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions,
 			seo, created_at, updated_at
 		FROM products WHERE numeric_id = $1`
 
 	product := &models.Product{}
 	var dimensionsJSON, seoJSON []byte
-	
+
 	err := r.db.QueryRow(query, numericID).Scan(
-		&product.ID, &product.VendorID, &product.Name, &product.Description,
+		&product.ID, &product.NumericID, &product.VendorID, &product.Name, &product.Description,
 		&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 		pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
 		&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
@@ -155,7 +155,7 @@ func (r *productRepository) GetAll(filters ProductFilters) ([]*models.Product, i
 	limitClause := r.buildLimitClause(filters)
 	
 	query := fmt.Sprintf(`
-		SELECT id, vendor_id, name, description, price, compare_price, sku,
+		SELECT id, numeric_id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions,
 			seo, created_at, updated_at
 		FROM products %s %s %s`, whereClause, orderClause, limitClause)
@@ -172,7 +172,7 @@ func (r *productRepository) GetAll(filters ProductFilters) ([]*models.Product, i
 		var dimensionsJSON, seoJSON []byte
 		
 		err := rows.Scan(
-			&product.ID, &product.VendorID, &product.Name, &product.Description,
+			&product.ID, &product.NumericID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
 			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
@@ -261,7 +261,7 @@ func (r *productRepository) GetByVendor(vendorID uuid.UUID, filters ProductFilte
 	limitClause := r.buildLimitClause(filters)
 	
 	query := fmt.Sprintf(`
-		SELECT id, vendor_id, name, description, price, compare_price, sku,
+		SELECT id, numeric_id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions,
 			seo, created_at, updated_at
 		FROM products %s %s %s`, whereClause, orderClause, limitClause)
@@ -278,7 +278,7 @@ func (r *productRepository) GetByVendor(vendorID uuid.UUID, filters ProductFilte
 		var dimensionsJSON, seoJSON []byte
 		
 		err := rows.Scan(
-			&product.ID, &product.VendorID, &product.Name, &product.Description,
+			&product.ID, &product.NumericID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
 			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
@@ -343,7 +343,7 @@ func (r *productRepository) Search(query string, filters ProductFilters) ([]*mod
 	limitClause := r.buildLimitClause(filters)
 	
 	query = fmt.Sprintf(`
-		SELECT id, vendor_id, name, description, price, compare_price, sku,
+		SELECT id, numeric_id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions,
 			seo, created_at, updated_at
 		FROM products %s %s %s`, whereClause, orderClause, limitClause)
@@ -360,7 +360,7 @@ func (r *productRepository) Search(query string, filters ProductFilters) ([]*mod
 		var dimensionsJSON, seoJSON []byte
 		
 		err := rows.Scan(
-			&product.ID, &product.VendorID, &product.Name, &product.Description,
+			&product.ID, &product.NumericID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
 			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,
@@ -386,7 +386,7 @@ func (r *productRepository) Search(query string, filters ProductFilters) ([]*mod
 
 func (r *productRepository) GetFeatured(limit int) ([]*models.Product, error) {
 	query := `
-		SELECT id, vendor_id, name, description, price, compare_price, sku,
+		SELECT id, numeric_id, vendor_id, name, description, price, compare_price, sku,
 			category, tags, images, stock, status, featured, weight, dimensions,
 			seo, created_at, updated_at
 		FROM products 
@@ -406,7 +406,7 @@ func (r *productRepository) GetFeatured(limit int) ([]*models.Product, error) {
 		var dimensionsJSON, seoJSON []byte
 		
 		err := rows.Scan(
-			&product.ID, &product.VendorID, &product.Name, &product.Description,
+			&product.ID, &product.NumericID, &product.VendorID, &product.Name, &product.Description,
 			&product.Price, &product.ComparePrice, &product.SKU, &product.Category,
 			pq.Array(&product.Tags), pq.Array(&product.Images), &product.Stock,
 			&product.Status, &product.Featured, &product.Weight, &dimensionsJSON,

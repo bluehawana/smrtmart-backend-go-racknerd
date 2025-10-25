@@ -68,7 +68,8 @@ const (
 
 // Product represents a product or service
 type Product struct {
-	ID          uuid.UUID     `json:"id" db:"id"`
+	ID          uuid.UUID     `json:"-" db:"id"`
+	NumericID   int           `json:"id" db:"numeric_id"`
 	VendorID    uuid.UUID     `json:"vendor_id" db:"vendor_id"`
 	Name        string        `json:"name" db:"name" validate:"required"`
 	Description string        `json:"description" db:"description"`
