@@ -1,0 +1,154 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Run go vet
+        run: go vet ./...
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build binary
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o server ./cmd/server
+          chmod +x server
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-binary
+          path: server
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: server-binary
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Create backup and stop service
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "cp /opt/smrtmart/server /opt/smrtmart/server.backup.$BACKUP_TIMESTAMP 2>/dev/null || true && \
+             sudo systemctl stop smrtmart"
+
+      - name: Deploy binary
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no \
+            server ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/smrtmart/server
+
+      - name: Deploy static files
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          if [ -d "static" ]; then
+            sshpass -p "$VPS_PASSWORD" scp -r -o StrictHostKeyChecking=no \
+              static ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/smrtmart/
+          fi
+          if [ -d "templates" ]; then
+            sshpass -p "$VPS_PASSWORD" scp -r -o StrictHostKeyChecking=no \
+              templates ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/smrtmart/
+          fi
+
+      - name: Set permissions and restart service
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "chmod +x /opt/smrtmart/server && \
+             sudo systemctl start smrtmart && \
+             sleep 3 && \
+             systemctl is-active smrtmart"
+
+      - name: Verify deployment
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sleep 5
+          STATUS=$(sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "systemctl is-active smrtmart")
+
+          if [ "$STATUS" != "active" ]; then
+            echo "Service failed to start! Rolling back..."
+            BACKUP_TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+              "cp /opt/smrtmart/server.backup.* /opt/smrtmart/server && \
+               sudo systemctl start smrtmart"
+            exit 1
+          fi
+
+          echo "✅ Deployment successful! Service is running."
+
+      - name: Show deployment logs
+        if: always()
+        env:
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "sudo journalctl -u smrtmart -n 20 --no-pager"
