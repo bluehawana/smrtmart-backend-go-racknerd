@@ -1,11 +1,12 @@
 name: Deploy to VPS
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-  workflow_dispatch:  # Allow manual trigger
+  # Disabled automatic deployment - enable after adding secrets
+  # push:
+  #   branches:
+  #     - main
+  #     - dev
+  workflow_dispatch:  # Manual trigger only until secrets are configured
 
 jobs:
   test:
