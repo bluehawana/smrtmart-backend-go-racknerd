@@ -101,34 +101,7 @@ func (h *VendorHandler) VerifyVendor(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Verify vendor endpoint - TODO"})
 }
 
-// CategoryHandler handles category endpoints
-type CategoryHandler struct {
-	service service.CategoryService
-}
-
-func NewCategoryHandler(service service.CategoryService) *CategoryHandler {
-	return &CategoryHandler{service: service}
-}
-
-func (h *CategoryHandler) GetCategories(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Get categories endpoint - TODO"})
-}
-
-func (h *CategoryHandler) GetCategory(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Get category endpoint - TODO"})
-}
-
-func (h *CategoryHandler) CreateCategory(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Create category endpoint - TODO"})
-}
-
-func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Update category endpoint - TODO"})
-}
-
-func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Delete category endpoint - TODO"})
-}
+// CategoryHandler is now implemented in category_handler.go
 
 // CartHandler handles shopping cart endpoints
 type CartHandler struct {
