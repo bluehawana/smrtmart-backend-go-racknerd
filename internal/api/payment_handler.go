@@ -180,38 +180,30 @@ func (h *PaymentHandler) CreateCheckoutSession(c *gin.Context) {
 func (h *PaymentHandler) StripeWebhook(c *gin.Context) {
 	payload, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.APIResponse{
+		// Log error but return 200 to acknowledge receipt
+		c.JSON(http.StatusOK, models.APIResponse{
 			Success: false,
 			Message: "Failed to read request body",
-			Error: &models.APIError{
-				Code:    "INVALID_PAYLOAD",
-				Message: err.Error(),
-			},
 		})
 		return
 	}
 
 	signature := c.GetHeader("Stripe-Signature")
 	if signature == "" {
-		c.JSON(http.StatusBadRequest, models.APIResponse{
+		// Log error but return 200 to acknowledge receipt
+		c.JSON(http.StatusOK, models.APIResponse{
 			Success: false,
 			Message: "Missing Stripe signature",
-			Error: &models.APIError{
-				Code:    "MISSING_SIGNATURE",
-				Message: "Stripe-Signature header is required",
-			},
 		})
 		return
 	}
 
 	if err := h.service.HandleWebhook(payload, signature); err != nil {
-		c.JSON(http.StatusBadRequest, models.APIResponse{
+		// Log error but ALWAYS return 200 to prevent Stripe from retrying
+		// Stripe requires 2xx status code to consider webhook delivered
+		c.JSON(http.StatusOK, models.APIResponse{
 			Success: false,
 			Message: "Failed to process webhook",
-			Error: &models.APIError{
-				Code:    "WEBHOOK_FAILED",
-				Message: err.Error(),
-			},
 		})
 		return
 	}

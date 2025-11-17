@@ -77,15 +77,22 @@ func (s *paymentService) CreateCheckoutSession(items []CheckoutItem, customerEma
 		}
 
 		// Add product images if available
+		// Skip images for now since we need valid URLs - Stripe requires https URLs
+		// TODO: Use Supabase storage or R2 for product images
+		/*
 		if len(item.Images) > 0 {
 			var images []*string
 			for _, img := range item.Images {
-				// Construct full image URL
-				imageURL := fmt.Sprintf("http://localhost:8080/uploads/%s", img)
-				images = append(images, stripe.String(imageURL))
+				// Skip if not a valid URL
+				if strings.HasPrefix(img, "http://") || strings.HasPrefix(img, "https://") {
+					images = append(images, stripe.String(img))
+				}
 			}
-			lineItem.PriceData.ProductData.Images = images
+			if len(images) > 0 {
+				lineItem.PriceData.ProductData.Images = images
+			}
 		}
+		*/
 
 		lineItems = append(lineItems, lineItem)
 	}
