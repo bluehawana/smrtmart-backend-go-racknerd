@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -85,11 +86,56 @@ func SecurityHeaders() gin.HandlerFunc {
 	})
 }
 
-// Rate limiting middleware
-func RateLimit() gin.HandlerFunc {
-	limiter := rate.NewLimiter(rate.Every(time.Minute), 100) // 100 requests per minute
+// Per-IP rate limiter storage
+type visitor struct {
+	limiter  *rate.Limiter
+	lastSeen time.Time
+}
 
+var (
+	visitors = make(map[string]*visitor)
+	mu       sync.RWMutex
+)
+
+// Cleanup old visitors every 5 minutes
+func init() {
+	go func() {
+		for {
+			time.Sleep(5 * time.Minute)
+			mu.Lock()
+			for ip, v := range visitors {
+				if time.Since(v.lastSeen) > 10*time.Minute {
+					delete(visitors, ip)
+				}
+			}
+			mu.Unlock()
+		}
+	}()
+}
+
+// Get or create rate limiter for IP
+func getVisitor(ip string) *rate.Limiter {
+	mu.Lock()
+	defer mu.Unlock()
+
+	v, exists := visitors[ip]
+	if !exists {
+		// 200 requests per minute per IP (generous for e-commerce browsing)
+		limiter := rate.NewLimiter(rate.Every(time.Second/3), 200)
+		visitors[ip] = &visitor{limiter, time.Now()}
+		return limiter
+	}
+
+	v.lastSeen = time.Now()
+	return v.limiter
+}
+
+// Rate limiting middleware - PER IP
+func RateLimit() gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
+		ip := c.ClientIP()
+		limiter := getVisitor(ip)
+
 		if !limiter.Allow() {
 			c.JSON(http.StatusTooManyRequests, gin.H{
 				"success": false,
